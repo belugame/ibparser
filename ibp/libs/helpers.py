@@ -1,5 +1,8 @@
 import argparse
+import glob
+import re
 from datetime import date, datetime, timedelta
+from os import path
 
 
 def parse_date_delta(date_delta):
@@ -78,3 +81,16 @@ def ignore_due_time_constraint(date_delta, timestamp):
         return timestamp < date_delta
     start, end = date_delta
     return not start <= timestamp <= end
+
+
+def get_latest_file(csv_folder):
+    """Return the newest csv file"""
+    csv_folder_glob = glob.glob(path.join(path.expanduser(csv_folder), "*.csv"))
+    latest_date = datetime(year=1900, month=1, day=1, hour=0, minute=0, second=0)
+    latest_file = None
+    for csv_file_name in csv_folder_glob:
+        file_date = datetime.strptime(re.findall(r"20\d{6}", csv_file_name).pop(), "%Y%m%d")
+        if file_date > latest_date:
+            latest_date = file_date
+            latest_file = csv_file_name
+    return latest_file
