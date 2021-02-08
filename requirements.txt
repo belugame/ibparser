@@ -1,4 +1,0 @@
-matplotlib
-peewee
-plotext
-yahoo-historical

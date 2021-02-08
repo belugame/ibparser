@@ -1,0 +1,16 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+forex-python = ">=1.5"
+matplotlib = ">=3.3.4"
+pandas = ">=1.2.1"
+peewee = ">=3.14.1"
+yahoo-historical = ">=0.3.2"
+
+[dev-packages]
+
+[requires]
+python_version = "3.9"
