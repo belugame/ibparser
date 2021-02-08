@@ -42,7 +42,7 @@ class ReportRealized(object):
         df = df.cumsum()
         df = df.resample("M").pad()
         df["total return"] = df[["realized", "dividends"]].sum(1)
-        df.plot()
+        df.plot(drawstyle="steps-post")
         plt.savefig('saved_figure.png')
 
 
