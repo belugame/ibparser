@@ -1,5 +1,5 @@
-import logging
 import locale
+import logging
 import os
 
 locale.setlocale(locale.LC_ALL, "")  # Use locale defined in user's environment

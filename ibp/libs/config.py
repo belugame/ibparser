@@ -1,8 +1,6 @@
 import configparser
 from os import path
-
 from pathlib import Path
-
 
 home = str(Path.home())
 config_file = path.join(home, ".ibparser.cfg")

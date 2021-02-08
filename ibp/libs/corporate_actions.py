@@ -1,10 +1,9 @@
 import csv
 import re
-from collections import namedtuple, defaultdict
+from collections import defaultdict, namedtuple
 from datetime import datetime
 
 from .logging import log
-
 
 CorporateAction = namedtuple(
     "CorporateAction", ["date", "symbol_ib", "ratio", "currency", "security_id_old", "security_id_new"]

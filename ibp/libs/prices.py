@@ -1,5 +1,6 @@
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
+
 from yahoo_historical import Fetcher
 
 from .config import config

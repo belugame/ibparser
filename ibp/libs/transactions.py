@@ -1,16 +1,15 @@
 import csv
 import re
-from datetime import date, datetime
 from collections import namedtuple
+from datetime import date, datetime
 
 from .config import config
 from .corporate_actions import CorporateActionParser
-from .helpers import parse_date_delta, ignore_due_time_constraint
+from .helpers import ignore_due_time_constraint, parse_date_delta
 from .instruments import InstrumentCollection, ignore_instrument
+from .logging import log
 from .parser import CSVReader
 from .prices import Money
-from .logging import log
-
 
 TransactionRowFormat1 = namedtuple(
     "TransactionFormat1",

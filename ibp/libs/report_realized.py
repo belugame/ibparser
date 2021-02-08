@@ -3,10 +3,10 @@ from itertools import chain
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from .dividends import DividendParser
-from .transactions import TransactionParser, Transaction
-from .parser import CSVReader
 from .config import config
+from .dividends import DividendParser
+from .parser import CSVReader
+from .transactions import Transaction, TransactionParser
 
 
 class ReportRealized(object):

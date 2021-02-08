@@ -2,8 +2,8 @@ from datetime import datetime, timedelta
 
 from .config import config
 from .corporate_actions import CorporateActionParser
-from .transactions import TransactionParser
 from .parser import CSVReader
+from .transactions import TransactionParser
 
 
 class Position:

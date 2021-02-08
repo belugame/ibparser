@@ -1,12 +1,11 @@
 import csv
 
-from .constants import IB_EXCHANGE_TO_CURRENCY
 from .config import config
+from .constants import IB_EXCHANGE_TO_CURRENCY
 from .logging import log
 from .models import Instrument as DBInstrument
 from .money import Money
-from .prices import PriceService
-from .prices import thread_price_service
+from .prices import PriceService, thread_price_service
 from .yahoo_instrument_scraper import YahooSymbolPageScraper
 from .yahoo_json_search_scraper import get_yahoo_json_search_result
 

@@ -1,6 +1,6 @@
 import os
 
-from peewee import SqliteDatabase, CharField, Model, ForeignKeyField, DateField, DateTimeField, FloatField
+from peewee import CharField, DateField, DateTimeField, FloatField, ForeignKeyField, Model, SqliteDatabase
 
 from .config import config
 

@@ -3,8 +3,8 @@ from datetime import date
 
 from forex_python.converter import CurrencyRates
 
-from .constants import KNOWN_CURRENCIES
 from .config import config
+from .constants import KNOWN_CURRENCIES
 from .logging import log
 from .models import CurrencyRate as DBCurrencyRate
 
