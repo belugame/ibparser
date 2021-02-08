@@ -5,7 +5,7 @@ from urllib import request
 from urllib.error import HTTPError
 
 from .config import config
-from .exceptions import BadYahooSymbol
+from .exceptions import BadYahooSymbolError
 from .logging import log
 
 
@@ -44,7 +44,7 @@ class YahooSymbolPageScraper(object):
             try:
                 my_request = self.get_yahoo_response(symbol)
                 response = self.parse_yahoo_response(my_request)
-            except BadYahooSymbol:
+            except BadYahooSymbolError:
                 self.tried_symbols.append(symbol)
             else:
                 if response[0]:
@@ -56,7 +56,7 @@ class YahooSymbolPageScraper(object):
         try:
             my_request = self.get_yahoo_response(symbol)
             return self.parse_yahoo_response(my_request)
-        except BadYahooSymbol:
+        except BadYahooSymbolError:
             self.tried_symbols.append(symbol)
         return None, None, None
 
@@ -67,7 +67,7 @@ class YahooSymbolPageScraper(object):
             try:
                 my_request = self.get_yahoo_response(symbol)
                 return self.parse_yahoo_response(my_request)
-            except BadYahooSymbol:
+            except BadYahooSymbolError:
                 self.tried_symbols.append(symbol)
                 continue
         return None, None, None
@@ -76,7 +76,7 @@ class YahooSymbolPageScraper(object):
         try:
             my_request = self.get_yahoo_response(self.symbol_ib)
             symbol, name, currency = self.parse_yahoo_response(my_request)
-        except BadYahooSymbol:
+        except BadYahooSymbolError:
             symbol, name = None, ""
 
         if symbol:
@@ -95,7 +95,7 @@ class YahooSymbolPageScraper(object):
 
     def get_yahoo_response(self, symbol, failed_attemps=0):
         if failed_attemps >= config.getint("instrument_fetch_max_allowed_tries"):
-            raise BadYahooSymbol()
+            raise BadYahooSymbolError()
         url = 'https://finance.yahoo.com/quote/{}'.format(symbol)
         try:
             my_request = request.urlopen(url)
@@ -107,7 +107,7 @@ class YahooSymbolPageScraper(object):
 
         if my_request.url != url:
             log.debug("{:12}: Not found".format(symbol))
-            raise BadYahooSymbol()
+            raise BadYahooSymbolError()
         else:
             log.debug("{:12}: Found".format(symbol))
 
@@ -160,5 +160,5 @@ def assert_string_similarity(symbol, name1, name2):
     if name_similarity < config.getfloat("min_name_similarity"):  # Compare name from yahoo page to name from csv
         log.debug("{:12}: Name disregarded, similarity of {:.3f}: {} vs {}".format(
             symbol, name_similarity, name1, name2))
-        raise BadYahooSymbol()
+        raise BadYahooSymbolError()
     log.debug("{:12}: Found {}".format(symbol, name2))
