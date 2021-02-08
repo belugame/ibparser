@@ -6,8 +6,7 @@ from .transactions import TransactionParser
 from .parser import CSVReader
 
 
-class Position():
-
+class Position:
     def __init__(self, instrument, amount, price):
         self.instrument = instrument
         self.amount = round(amount)
@@ -50,8 +49,7 @@ class Portfolio(object):
 
     portfolio = {}
 
-    def __init__(self, reader, instruments_filter=None, display_currency=None,
-                 machine_readable=False, sort_order=None):
+    def __init__(self, reader, instruments_filter=None, display_currency=None, machine_readable=False, sort_order=None):
         self.instruments_filter = instruments_filter
         self.display_currency = display_currency
         self.machine_readable = machine_readable

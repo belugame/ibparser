@@ -6,12 +6,14 @@ from datetime import datetime
 from .logging import log
 
 
-CorporateAction = namedtuple("CorporateAction", [
-    "date", "symbol_ib", "ratio", "currency", "security_id_old", "security_id_new"])
+CorporateAction = namedtuple(
+    "CorporateAction", ["date", "symbol_ib", "ratio", "currency", "security_id_old", "security_id_new"]
+)
 
 
 class CorporateActionParser(object):
     """Handles stock splits and merges to correct previous transaction prices accordingly."""
+
     actions = defaultdict(list)
 
     def __init__(self, reader):
@@ -48,5 +50,6 @@ class CorporateActionParser(object):
                 t.amount = t.amount * a.ratio
                 t.transaction_price = t.transaction_price / a.ratio
                 applied_actions.append(key)
-                log.info("Applying {}: {} {}".format("split" if a.ratio < 1 else "merge",
-                         a.ratio, t.instrument.symbol_ib))
+                log.info(
+                    "Applying {}: {} {}".format("split" if a.ratio < 1 else "merge", a.ratio, t.instrument.symbol_ib)
+                )

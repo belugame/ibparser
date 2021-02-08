@@ -18,16 +18,16 @@ setuptools.setup(
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Operating System :: Unix",
     ],
-    python_requires='>=3.8',
+    python_requires=">=3.8",
     install_requires=[
-        'forex-python',
-        'matplotlib',
-        'pandas',
-        'peewee',
-        'yahoo-historical',
+        "forex-python",
+        "matplotlib",
+        "pandas",
+        "peewee",
+        "yahoo-historical",
     ],
     entry_points={
-        'console_scripts': ['ibp=ibp.__main__:main'],
+        "console_scripts": ["ibp=ibp.__main__:main"],
     },
     include_package_data=True,
 )

@@ -27,7 +27,7 @@ class Instrument(BaseModel):
 
 
 class Price(BaseModel):
-    instrument = ForeignKeyField(Instrument, related_name='prices', null=False)
+    instrument = ForeignKeyField(Instrument, related_name="prices", null=False)
     price = FloatField()
     datetime = DateTimeField(null=False)
 

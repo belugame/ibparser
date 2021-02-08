@@ -12,14 +12,78 @@ from .prices import Money
 from .logging import log
 
 
-TransactionRowFormat1 = namedtuple("TransactionFormat1", [
-    "currency", "symbol_ib", "timestamp", "amount", "transaction_price", "c_price", "transaction_total", "fee", "basis", "realized", "realized_percent", "mtm", "code"])
-TransactionRowFormat2 = namedtuple("TransactionFormat2", [
-    "currency", "symbol_ib", "timestamp", "blank", "amount", "transaction_price", "c_price", "transaction_total", "fee", "basis", "realized", "realized_percent", "mtm", "code"])
-TransactionRowFormat3 = namedtuple("TransactionFormat3", [
-    "currency", "symbol_ib", "timestamp", "amount", "transaction_price", "c_price", "transaction_total", "fee", "basis", "realized", "mtm", "code"])
-TransactionRowFormat4 = namedtuple("TransactionFormat4", [
-    "currency", "symbol_ib", "timestamp", "exchange", "amount", "transaction_price", "c_price", "transaction_total", "fee", "basis", "realized", "mtm", "code"])
+TransactionRowFormat1 = namedtuple(
+    "TransactionFormat1",
+    [
+        "currency",
+        "symbol_ib",
+        "timestamp",
+        "amount",
+        "transaction_price",
+        "c_price",
+        "transaction_total",
+        "fee",
+        "basis",
+        "realized",
+        "realized_percent",
+        "mtm",
+        "code",
+    ],
+)
+TransactionRowFormat2 = namedtuple(
+    "TransactionFormat2",
+    [
+        "currency",
+        "symbol_ib",
+        "timestamp",
+        "blank",
+        "amount",
+        "transaction_price",
+        "c_price",
+        "transaction_total",
+        "fee",
+        "basis",
+        "realized",
+        "realized_percent",
+        "mtm",
+        "code",
+    ],
+)
+TransactionRowFormat3 = namedtuple(
+    "TransactionFormat3",
+    [
+        "currency",
+        "symbol_ib",
+        "timestamp",
+        "amount",
+        "transaction_price",
+        "c_price",
+        "transaction_total",
+        "fee",
+        "basis",
+        "realized",
+        "mtm",
+        "code",
+    ],
+)
+TransactionRowFormat4 = namedtuple(
+    "TransactionFormat4",
+    [
+        "currency",
+        "symbol_ib",
+        "timestamp",
+        "exchange",
+        "amount",
+        "transaction_price",
+        "c_price",
+        "transaction_total",
+        "fee",
+        "basis",
+        "realized",
+        "mtm",
+        "code",
+    ],
+)
 
 
 class Transaction(object):
@@ -27,8 +91,10 @@ class Transaction(object):
     Represents a buy or sell transaction based on a csv row. Adds information that we calculate or fetch from
     3rd party to the CSV data.
     """
-    def __init__(self, timestamp, instrument, amount, transaction_price, fee, realized, transaction_total,
-                 realized_percent):
+
+    def __init__(
+        self, timestamp, instrument, amount, transaction_price, fee, realized, transaction_total, realized_percent
+    ):
         # log.debug("{}.__init__".format(self))
         self.timestamp = timestamp
         self.instrument = instrument
@@ -79,8 +145,16 @@ class Transaction(object):
 class TransactionParser(object):
     """Creates a csv-like report with stock orders (buy/sell actions)"""
 
-    def __init__(self, reader, instruments_filter=None, only_sell=False, only_buy=False, display_currency=None,
-                 date_delta=None, machine_readable=False):
+    def __init__(
+        self,
+        reader,
+        instruments_filter=None,
+        only_sell=False,
+        only_buy=False,
+        display_currency=None,
+        date_delta=None,
+        machine_readable=False,
+    ):
         self.reader = reader
         self.instruments = InstrumentCollection(reader, instruments_filter)
         self.only_sell = only_sell
@@ -110,9 +184,13 @@ class TransactionParser(object):
     def _parse_row_to_namedtuple(self, row):
         """Single line in csv file to python namedtuple w/o adding or calculating additional data"""
         row_starts = (
-            ['Trades', 'Data', 'Order',
-             'Stocks - Held with Interactive Brokers (U.K.) Limited carried by Interactive Brokers LLC'],
-            ['Trades', 'Data', 'Order', 'Stocks']
+            [
+                "Trades",
+                "Data",
+                "Order",
+                "Stocks - Held with Interactive Brokers (U.K.) Limited carried by Interactive Brokers LLC",
+            ],
+            ["Trades", "Data", "Order", "Stocks"],
         )
         assert row[:4] in row_starts, row
         row = row[4:]
@@ -130,8 +208,9 @@ class TransactionParser(object):
         return transaction
 
     def _namedtuple_to_instance(self, transaction_tuple):
-        if ignore_instrument(None, [transaction_tuple.symbol_ib], self.instruments.instrument_filter,
-                             transaction_tuple.currency):
+        if ignore_instrument(
+            None, [transaction_tuple.symbol_ib], self.instruments.instrument_filter, transaction_tuple.currency
+        ):
             return None
         timestamp = datetime.strptime(transaction_tuple.timestamp, "%Y-%m-%d, %H:%M:%S")
         if ignore_due_time_constraint(self.date_delta, timestamp):
@@ -156,10 +235,14 @@ class TransactionParser(object):
         except AttributeError:
             realized_percent = None
 
-        transaction = Transaction(timestamp, instrument, amount, transaction_price, fee, realized, transaction_total,
-                                  realized_percent)
-        if [t for t in self.transactions if t.timestamp == transaction.timestamp and
-                t.instrument == transaction.instrument]:
+        transaction = Transaction(
+            timestamp, instrument, amount, transaction_price, fee, realized, transaction_total, realized_percent
+        )
+        if [
+            t
+            for t in self.transactions
+            if t.timestamp == transaction.timestamp and t.instrument == transaction.instrument
+        ]:
             return None  # Avoids trades that are in more than one csv to be added more than once
         return transaction
 
@@ -186,7 +269,8 @@ class TransactionParser(object):
             columns += [
                 "{:7.3f}".format(price),
                 "{:7.2f}".format(price_today),
-                "{:+7,.0f}".format(-1 * t.amount * price)]
+                "{:+7,.0f}".format(-1 * t.amount * price),
+            ]
 
             columns.append("{:7.1%}".format(t.unrealized_percent))
 
@@ -209,5 +293,7 @@ class TransactionParser(object):
 
 def main(instruments_filter, only_sell, only_buy, display_currency, date_delta, machine_readable):
     reader = CSVReader(config.get("csv_path"))
-    p = TransactionParser(reader, instruments_filter, only_sell, only_buy, display_currency, date_delta, machine_readable)
+    p = TransactionParser(
+        reader, instruments_filter, only_sell, only_buy, display_currency, date_delta, machine_readable
+    )
     p.print_transactions()

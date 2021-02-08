@@ -22,22 +22,30 @@ def main():
     args = parser.parse_args(sysargs)
     if sysargs[0] == "transactions":
         transactions_main(
-                args.instruments_filter, args.only_sell, args.only_buy, args.display_currency,
-                args.date_delta, args.machine_readable)
+            args.instruments_filter,
+            args.only_sell,
+            args.only_buy,
+            args.display_currency,
+            args.date_delta,
+            args.machine_readable,
+        )
     elif sysargs[0] == "dividends":
-        dividends_main(args.instruments_filter, args.display_currency, args.date_delta,
-                       args.machine_readable, args.filter_currency)
+        dividends_main(
+            args.instruments_filter, args.display_currency, args.date_delta, args.machine_readable, args.filter_currency
+        )
     elif sysargs[0] == "deposits":
         deposits_main(args.display_currency, args.date_delta, args.machine_readable, args.filter_currency)
     elif sysargs[0] == "portfolio":
-        portfolio_main(args.instruments_filter, args.display_currency, args.machine_readable,
-                       args.sort_order)
+        portfolio_main(args.instruments_filter, args.display_currency, args.machine_readable, args.sort_order)
     elif sysargs[0] == "report_realized":
-        report_realized_main(instruments_filter=args.instruments_filter, date_delta=args.date_delta,
-                             display_currency=args.display_currency)
+        report_realized_main(
+            instruments_filter=args.instruments_filter,
+            date_delta=args.date_delta,
+            display_currency=args.display_currency,
+        )
     elif not sysargs[0]:
         raise RuntimeError("Missing mode. {}.".format(modes_msg))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

@@ -10,7 +10,6 @@ from .models import CurrencyRate as DBCurrencyRate
 
 
 class Money(object):
-
     def __init__(self, amount, currency):
         assert isinstance(amount, float)
         assert currency, "No currency provided."
@@ -75,7 +74,7 @@ def convert_currency(base_currency, destination_currency, amount):
     assert destination_currency in KNOWN_CURRENCIES, destination_currency
     currency_converter = config.get("currency_converter")
     if currency_converter == "gnu-units":
-        output = os.popen('units --terse -- {}{} {}'.format(amount, base_currency, destination_currency)).read()
+        output = os.popen("units --terse -- {}{} {}".format(amount, base_currency, destination_currency)).read()
         return float(output.strip())
     elif currency_converter == "forex-python":
         return currency_converter.convert(base_currency, destination_currency, amount)
@@ -84,6 +83,7 @@ def convert_currency(base_currency, destination_currency, amount):
 
 class CachedCurrencyRates(CurrencyRates):
     """Caches currency rates that have already been fetched for great speed up."""
+
     cache = {}
 
     def convert(self, base_cur, dest_cur, amount, given_date=date.today()):

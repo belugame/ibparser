@@ -43,14 +43,20 @@ class ReportRealized(object):
         df = df.resample("M").pad()
         df["total return"] = df[["realized", "dividends"]].sum(1)
         df.plot(drawstyle="steps-post")
-        plt.savefig('saved_figure.png')
-
+        plt.savefig("saved_figure.png")
 
 
 def main(instruments_filter, date_delta, display_currency):
     reader = CSVReader(config.get("csv_path"))
-    transactions = TransactionParser(reader, instruments_filter, only_sell=True, display_currency=display_currency,
-                                     date_delta=date_delta, machine_readable=True).get_csv_transactions()
-    dividends = DividendParser(reader, instruments_filter, display_currency=display_currency, date_delta=date_delta,
-                               machine_readable=True).parse_dividend_lines()
+    transactions = TransactionParser(
+        reader,
+        instruments_filter,
+        only_sell=True,
+        display_currency=display_currency,
+        date_delta=date_delta,
+        machine_readable=True,
+    ).get_csv_transactions()
+    dividends = DividendParser(
+        reader, instruments_filter, display_currency=display_currency, date_delta=date_delta, machine_readable=True
+    ).parse_dividend_lines()
     ReportRealized(transactions, dividends, display_currency=display_currency).print_report()

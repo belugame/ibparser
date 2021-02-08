@@ -15,6 +15,7 @@ class Instrument(object):
     """
     Holds all info we extract straight from a CSV file. Not all have a security id, e.g. AFK or ASX
     """
+
     currency = None
     _db_instrument = None
 
@@ -45,8 +46,11 @@ class Instrument(object):
             self.symbol_yahoo = db_instrument.symbol_yahoo
             self.currency = db_instrument.currency
         else:
-            log.debug("{:12}: Start yahoo search, currency {}, name '{}', id {}".format(
-                self.symbol_ib, self.currency, self.name, self.security_id or "-"))
+            log.debug(
+                "{:12}: Start yahoo search, currency {}, name '{}', id {}".format(
+                    self.symbol_ib, self.currency, self.name, self.security_id or "-"
+                )
+            )
             if self.security_id:
                 self.symbol_yahoo, yahoo_name, yahoo_currency = get_yahoo_json_search_result(self.security_id)
             if not self.symbol_yahoo:
@@ -54,10 +58,14 @@ class Instrument(object):
                 if not self.currency:
                     self.currency = yahoo_currency
             if not yahoo_currency or self.currency != yahoo_currency:
-                log.warn("Could not confirm IB currency with yahoo result: {} != {} (yahoo)".format(
-                    self.currency, yahoo_currency))
+                log.warn(
+                    "Could not confirm IB currency with yahoo result: {} != {} (yahoo)".format(
+                        self.currency, yahoo_currency
+                    )
+                )
                 self.symbol_yahoo, yahoo_name, yahoo_currency = YahooSymbolPageScraper(
-                        self.symbol_ib, self.name, self.currency).fetch()
+                    self.symbol_ib, self.name, self.currency
+                ).fetch()
                 if not self.currency:
                     self.currency = yahoo_currency
                 else:
@@ -99,7 +107,8 @@ class InstrumentCollection(object):
             db_instrument = db.get_by_symbol_ib(symbol_ib, currency)
         if db_instrument:
             assert db_instrument.currency == currency, "Currency mismatch: DB {} vs transaction {}".format(
-                    db_instrument.currency, currency)
+                db_instrument.currency, currency
+            )
             return db_instrument_to_instrument(db_instrument)
 
         # This happens for newly bought stocks where we only have a daily_*.csv and no 'Financial Instrument' line:
@@ -114,6 +123,7 @@ class InstrumentParser(object):
     information we need them to know the full name of the companies. Also we need it to identify company name changes as
     here we get an unique id.
     """
+
     instruments = {}
 
     def __init__(self, reader, instrument_filter=None):
@@ -209,7 +219,8 @@ class InstrumentDatabase(object):
                 symbols_ib_additional=",".join(instrument.symbols_ib_additional),
                 security_id=instrument.security_id,
                 con_id=instrument.con_id,
-                currency=instrument.currency).save()
+                currency=instrument.currency,
+            ).save()
 
     def update_symbols(self, db_instrument, symbols):
         if db_instrument.symbol_ib not in symbols:
@@ -259,8 +270,13 @@ def extract_symbol(symbol):
 
 def db_instrument_to_instrument(db_instrument):
     """From db object to class instance"""
-    instrument = Instrument(db_instrument.symbol_ib, db_instrument.name, db_instrument.con_id,
-                            db_instrument.security_id, db_instrument.currency)
+    instrument = Instrument(
+        db_instrument.symbol_ib,
+        db_instrument.name,
+        db_instrument.con_id,
+        db_instrument.security_id,
+        db_instrument.currency,
+    )
     instrument._db_instrument = db_instrument
     return instrument
 

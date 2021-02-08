@@ -12,9 +12,9 @@ def get_yahoo_json_search_result(query):
     finance.yahoo.com.
     """
     log.debug("Query yahoo: {}".format(query))
-    url = 'https://query1.finance.yahoo.com/v1/finance/search?q={}'.format(quote(query))
+    url = "https://query1.finance.yahoo.com/v1/finance/search?q={}".format(quote(query))
     my_request = request.urlopen(url)
-    response = my_request.read().decode('utf-8')
+    response = my_request.read().decode("utf-8")
     response = json.loads(response)
     if len(response["quotes"]) == 0:
         log.debug("{:12}: No quotes found.".format(query))

@@ -10,11 +10,10 @@ from .money import Money
 from .parser import CSVReader
 
 
-Dividend = namedtuple('Dividend', ['timestamp', 'currency', 'instrument', 'amount_total'])
+Dividend = namedtuple("Dividend", ["timestamp", "currency", "instrument", "amount_total"])
 
 
 class Dividend(object):
-
     def __init__(self, timestamp, currency, instrument, amount, description):
         self.timestamp = timestamp
         self.currency = currency
@@ -29,7 +28,15 @@ class Dividend(object):
 class DividendParser(object):
     """Creates a csv-like report for dividends received """
 
-    def __init__(self, reader, instruments_filter=None, display_currency=None, date_delta=None, machine_readable=False, filter_currency=None):
+    def __init__(
+        self,
+        reader,
+        instruments_filter=None,
+        display_currency=None,
+        date_delta=None,
+        machine_readable=False,
+        filter_currency=None,
+    ):
         self.reader = reader
         self.instruments_filter = instruments_filter
         self.display_currency = display_currency
@@ -69,7 +76,7 @@ class DividendParser(object):
                 if d.description == description and "LU0378438732" not in description:
                     log.debug("Skipping duplicate dividend: {}".format(key))
                     continue
-                dividends[key+"-2"] = Dividend(date_activity, currency, db_instrument, amount, description)
+                dividends[key + "-2"] = Dividend(date_activity, currency, db_instrument, amount, description)
             else:
                 dividends[key] = Dividend(date_activity, currency, db_instrument, amount, description)
         return sorted(dividends.values(), key=lambda d: d.timestamp)
@@ -93,8 +100,7 @@ class DividendParser(object):
         print("Total: {:,.2f}".format(total))
 
 
-def main(instruments_filter=None, display_currency=None, date_delta=None, machine_readable=False,
-         filter_currency=None):
+def main(instruments_filter=None, display_currency=None, date_delta=None, machine_readable=False, filter_currency=None):
     reader = CSVReader(config.get("csv_path"))
     parser = DividendParser(reader, instruments_filter, display_currency, date_delta, machine_readable, filter_currency)
     dividends = parser.parse_dividend_lines()

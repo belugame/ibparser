@@ -8,7 +8,7 @@ from .parser import CSVReader
 from .money import Money
 
 
-MoneyMove = namedtuple('MoneyMove', ['date', 'currency', 'amount', 'description'])
+MoneyMove = namedtuple("MoneyMove", ["date", "currency", "amount", "description"])
 
 
 class MoneyMoveParser(object):
