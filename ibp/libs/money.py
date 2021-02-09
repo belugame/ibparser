@@ -78,7 +78,7 @@ def convert_currency(base_currency, destination_currency, amount):
         return float(output.strip())
     elif converter == "forex-python":
         return forex_converter.convert(base_currency, destination_currency, amount)
-    raise RuntimeException("Unknown currency_converter. Should be either forex-python or gnu-units.")
+    raise RuntimeError("Unknown currency_converter. Should be either forex-python or gnu-units: {}".format(converter))
 
 
 class CachedCurrencyRates(CurrencyRates):
