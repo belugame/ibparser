@@ -32,9 +32,9 @@ class DividendParser(object):
         reader,
         instruments_filter=None,
         display_currency=None,
+        filter_currency=None,
         date_delta=None,
         machine_readable=False,
-        filter_currency=None,
     ):
         self.reader = reader
         self.instruments_filter = instruments_filter
@@ -99,8 +99,8 @@ class DividendParser(object):
         print("Total: {:,.2f}".format(total))
 
 
-def main(instruments_filter=None, display_currency=None, date_delta=None, machine_readable=False, filter_currency=None):
+def main(instruments_filter=None, display_currency=None, filter_currency=None, date_delta=None, machine_readable=False):
     reader = CSVReader(config.get("csv_path"))
-    parser = DividendParser(reader, instruments_filter, display_currency, date_delta, machine_readable, filter_currency)
+    parser = DividendParser(reader, instruments_filter, display_currency, filter_currency, date_delta, machine_readable)
     dividends = parser.parse_dividend_lines()
     parser.print_dividends(dividends)

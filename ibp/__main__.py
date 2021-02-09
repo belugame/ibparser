@@ -26,17 +26,20 @@ def main():
             args.only_sell,
             args.only_buy,
             args.display_currency,
+            args.filter_currency,
             args.date_delta,
             args.machine_readable,
         )
     elif sysargs[0] == "dividends":
         dividends_main(
-            args.instruments_filter, args.display_currency, args.date_delta, args.machine_readable, args.filter_currency
+            args.instruments_filter, args.display_currency, args.filter_currency, args.date_delta, args.machine_readable
         )
     elif sysargs[0] == "deposits":
-        deposits_main(args.display_currency, args.date_delta, args.machine_readable, args.filter_currency)
+        deposits_main(args.display_currency, args.filter_currency, args.date_delta, args.machine_readable)
     elif sysargs[0] == "portfolio":
-        portfolio_main(args.instruments_filter, args.display_currency, args.machine_readable, args.sort_order)
+        portfolio_main(
+            args.instruments_filter, args.display_currency, args.filter_currency, args.machine_readable, args.sort_order
+        )
     elif sysargs[0] == "report_realized":
         report_realized_main(
             instruments_filter=args.instruments_filter,

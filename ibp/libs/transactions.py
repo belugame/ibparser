@@ -151,6 +151,7 @@ class TransactionParser(object):
         only_sell=False,
         only_buy=False,
         display_currency=None,
+        filter_currency=None,
         date_delta=None,
         machine_readable=False,
     ):
@@ -159,6 +160,7 @@ class TransactionParser(object):
         self.only_sell = only_sell
         self.only_buy = only_buy
         self.display_currency = display_currency
+        self.filter_currency = filter_currency
         self.machine_readable = machine_readable
         self.date_delta = parse_date_delta(date_delta)
         super(TransactionParser, self).__init__()
@@ -210,6 +212,8 @@ class TransactionParser(object):
         if ignore_instrument(
             None, [transaction_tuple.symbol_ib], self.instruments.instrument_filter, transaction_tuple.currency
         ):
+            return None
+        if self.filter_currency and self.filter_currency != transaction_tuple.currency:
             return None
         timestamp = datetime.strptime(transaction_tuple.timestamp, "%Y-%m-%d, %H:%M:%S")
         if ignore_due_time_constraint(self.date_delta, timestamp):
@@ -290,9 +294,9 @@ class TransactionParser(object):
         print("Total: {:,.2f}".format(total_realized))
 
 
-def main(instruments_filter, only_sell, only_buy, display_currency, date_delta, machine_readable):
+def main(instruments_filter, only_sell, only_buy, display_currency, filter_currency, date_delta, machine_readable):
     reader = CSVReader(config.get("csv_path"))
     p = TransactionParser(
-        reader, instruments_filter, only_sell, only_buy, display_currency, date_delta, machine_readable
+        reader, instruments_filter, only_sell, only_buy, display_currency, filter_currency, date_delta, machine_readable
     )
     p.print_transactions()

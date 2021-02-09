@@ -57,7 +57,7 @@ class MoneyMoveParser(object):
         print("Total: {:,.2f}".format(total))
 
 
-def main(display_currency=None, date_delta=None, machine_readable=False, filter_currency=None):
+def main(display_currency=None, filter_currency=None, date_delta=None, machine_readable=False):
     reader = CSVReader(config.get("csv_path"))
     parser = MoneyMoveParser(reader, display_currency, date_delta, machine_readable, filter_currency)
     money_moves = sorted(parser.parse_money_lines().values(), key=lambda d: d.date)

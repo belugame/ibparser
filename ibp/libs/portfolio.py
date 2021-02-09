@@ -49,9 +49,18 @@ class Portfolio(object):
 
     portfolio = {}
 
-    def __init__(self, reader, instruments_filter=None, display_currency=None, machine_readable=False, sort_order=None):
+    def __init__(
+        self,
+        reader,
+        instruments_filter=None,
+        display_currency=None,
+        filter_currency=None,
+        machine_readable=False,
+        sort_order=None,
+    ):
         self.instruments_filter = instruments_filter
         self.display_currency = display_currency
+        self.filter_currency = filter_currency
         self.machine_readable = machine_readable
         self.sort_order = sort_order or "name"
         transactions = TransactionParser(reader, instruments_filter, display_currency).get_csv_transactions()
@@ -119,7 +128,7 @@ class Portfolio(object):
                 print("  ".join(columns))
 
 
-def main(instruments_filter, display_currency, machine_readable, sort_order):
+def main(instruments_filter, display_currency, filter_currency, machine_readable, sort_order):
     reader = CSVReader(config.get("csv_path"))
-    p = Portfolio(reader, instruments_filter, display_currency, machine_readable, sort_order)
+    p = Portfolio(reader, instruments_filter, display_currency, filter_currency, machine_readable, sort_order)
     p.print()
