@@ -72,12 +72,12 @@ class Money(object):
 def convert_currency(base_currency, destination_currency, amount):
     assert base_currency in KNOWN_CURRENCIES, base_currency
     assert destination_currency in KNOWN_CURRENCIES, destination_currency
-    currency_converter = config.get("currency_converter")
-    if currency_converter == "gnu-units":
+    converter = config.get("currency_converter")
+    if converter == "gnu-units":
         output = os.popen("units --terse -- {}{} {}".format(amount, base_currency, destination_currency)).read()
         return float(output.strip())
-    elif currency_converter == "forex-python":
-        return currency_converter.convert(base_currency, destination_currency, amount)
+    elif converter == "forex-python":
+        return forex_converter.convert(base_currency, destination_currency, amount)
     raise RuntimeException("Unknown currency_converter. Should be either forex-python or gnu-units.")
 
 
@@ -104,4 +104,4 @@ class CachedCurrencyRates(CurrencyRates):
         return rate * amount
 
 
-currency_converter = CachedCurrencyRates()
+forex_converter = CachedCurrencyRates()
