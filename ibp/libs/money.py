@@ -60,6 +60,11 @@ class Money(object):
     def __eq__(self, b):
         return all([self.currency == b.currency, self.as_float == b.as_float])
 
+    def __lt__(self, b):
+        if self.currency == b.currency:
+            return self.as_float < b.as_float
+        return self.as_float < b.convert_to(self.currency).as_float
+
     def __bool__(self):
         return self.as_float != 0.0
 

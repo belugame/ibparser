@@ -136,10 +136,13 @@ class Portfolio(object):
         if sort_order.endswith("_r"):
             sort_order = sort_order[:-2]
         methods = {
-            "name": lambda x: x.symbol_ib,
+            "symbol": lambda x: x.symbol_ib,
             "amount": lambda x: x.amount,
-            # "symbol": lambda x: x.instrument.symbol_yahoo,
+            "value": lambda x: x.value_now,
+            "percent": lambda x: x.delta_percentage,
+            "absolut": lambda x: x.delta_absolute,
         }
+        assert sort_order in methods
         return methods.get(sort_order)
 
 
