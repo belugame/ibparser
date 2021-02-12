@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from .config import config
 from .corporate_actions import CorporateActionParser
 from .helpers import get_latest_file
+from .money import Money
 from .parser import CSVReader
 from .transactions import TransactionParser
 
@@ -133,19 +134,34 @@ class Portfolio(object):
 class Portfolio2(object):
     portfolio = {}
 
-    def __init__(self, reader, instruments_filter=None, display_currency=None, machine_readable=False, sort_order=None):
+    def __init__(
+        self,
+        reader,
+        instruments_filter=None,
+        display_currency=None,
+        filter_currency=None,
+        machine_readable=False,
+        sort_order=None,
+    ):
+        self.reader = reader
         self.instruments_filter = instruments_filter
         self.display_currency = display_currency
+        self.filter_currency = filter_currency
         self.machine_readable = machine_readable
         self.sort_order = sort_order or "name"
         self.position_lines = reader.get_position_lines()
+        self.get_portfolio_metadata()
+        self.total_stock_value, self.base_currency = self.get_portfolio_metadata()
 
     def print_positions(self):
         reader = csv.reader(self.position_lines, delimiter=",")
         positions = []
         for row in reader:
-            row = row[4:8]
-            currency, symbol_ib, _, amount = row
+            row = row[4:]
+            currency, symbol_ib, _, amount, _, price_average, value_cost, price_now, value_now, value_delta, \
+                portfolio_weigth, _ = row
+            if self.filter_currency and self.filter_currency != currency:
+                continue
             columns = [
                 "{}".format(currency),
                 "{:7.7}".format(symbol_ib),
@@ -153,30 +169,20 @@ class Portfolio2(object):
             ]
             print("  ".join(columns))
 
-        # self.total_stock_value, self.base_currency = self.get_portfolio_metadata(first_non_daily_file)
+    def get_portfolio_metadata(self):
+        """
+        Determine total stock value (needed for calculating weight of each position) and base currency (currency IB
+        uses for unrealized profits, fees etc.)
+        """
+        metadata = self.reader.get_portfolio_lines()
+        base_currency = metadata[0].split(",").pop().strip()
+        nav_total = Money(float(metadata[1].split(",")[6]), base_currency)
+        return nav_total, base_currency
 
-     def get_portfolio_metadata(self, csv_filename):
-         """
-         Determine total stock value (needed for calculating weight of each position) and base currency (currency IB
-         uses for unrealized profits, fees etc.)
-         """
-         with open(csv_filename) as csv_file:
-             total_stock_value = base_currency = None
-             for i, line in enumerate(csv_file):
-                 if line.startswith("Account Information,Data,Base Currency"):
-                     base_currency = line.split(",").pop().strip()
-                     continue
-                 if line.startswith("Net Asset Value,Data,Total"):
-                     total_stock_value = float(line.split(",")[3])
-                 if total_stock_value and base_currency:
-                     break
-         assert total_stock_value, "Could not find total stock value in {}".format(csv_filename)
-         assert base_currency, "Could not find base currency in {}".format(base_currency)
-         return Money(total_stock_value, base_currency), base_currency
 
-def main(instruments_filter, display_currency, machine_readable, sort_order):
+def main(instruments_filter, display_currency, filter_currency, machine_readable, sort_order):
     csv_path = config.get("csv_path")
     latest = get_latest_file(csv_path)
-    reader = CSVReader(files=[latest], patterns=[CSVReader.position_pattern])
+    reader = CSVReader(files=[latest], patterns=[CSVReader.position_pattern, CSVReader.portfolio_pattern])
     p = Portfolio2(reader, instruments_filter, display_currency, machine_readable, sort_order)
     p.print_positions()

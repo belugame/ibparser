@@ -16,6 +16,8 @@ class CSVReader(object):
     transaction_pattern = r"^Trades,Data,Order,Stocks"
     corporate_action_pattern = r"^Corporate Actions,Data,Stocks"
     position_pattern = r"Long Open Positions,Data,Summary,Stocks"
+
+    portfolio_pattern = r"Account Information,Data,Base Currency|Net Asset Value,Data,Total"
     patterns = [dividend_pattern, instrument_pattern, transaction_pattern, money_move_pattern, corporate_action_pattern]
     relevant_lines = defaultdict(list)
 
@@ -61,3 +63,6 @@ class CSVReader(object):
 
     def get_position_lines(self):
         return self.relevant_lines[self.position_pattern]
+
+    def get_portfolio_lines(self):
+        return self.relevant_lines[self.portfolio_pattern]
