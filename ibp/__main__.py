@@ -13,11 +13,13 @@ def main():
     sysargs = sys.argv[1:]
     modes = {"t": "transactions", "d": "dividends", "e": "deposits", "p": "portfolio", "rr": "report_realized"}
     modes_msg = "Possible values: {}".format(", ".join(modes.values()))
-    if len(sysargs) > 0:
-        if sysargs[0] in modes.keys():
-            sysargs[0] = modes[sysargs[0]]
-        elif sysargs[0] not in modes.values():
-            raise RuntimeError("Unexpected mode '{}'. {}".format(sysargs[0], modes_msg))
+    if len(sysargs) == 0:
+        raise RuntimeError("Missing mode. {}.".format(modes_msg))
+
+    if sysargs[0] in modes.keys():
+        sysargs[0] = modes[sysargs[0]]
+    elif sysargs[0] not in modes.values():
+        raise RuntimeError("Unexpected mode '{}'. {}".format(sysargs[0], modes_msg))
 
     args = parser.parse_args(sysargs)
     if sysargs[0] == "transactions":
@@ -46,8 +48,6 @@ def main():
             date_delta=args.date_delta,
             display_currency=args.display_currency,
         )
-    elif not sysargs[0]:
-        raise RuntimeError("Missing mode. {}.".format(modes_msg))
 
 
 if __name__ == "__main__":
