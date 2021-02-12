@@ -64,72 +64,8 @@ class Position:
         return self.price_now / self.instrument.get_price(day)
 
 
+
 class Portfolio(object):
-
-    portfolio = {}
-
-    def __init__(
-        self,
-        reader,
-        instruments_filter=None,
-        display_currency=None,
-        filter_currency=None,
-        machine_readable=False,
-        sort_order=None,
-    ):
-        self.instruments_filter = instruments_filter
-        self.display_currency = display_currency
-        self.filter_currency = filter_currency
-        self.machine_readable = machine_readable
-        self.sort_order = sort_order or "name"
-        transactions = TransactionParser(reader, instruments_filter, display_currency).get_csv_transactions()
-        CorporateActionParser(reader).apply_actions(transactions)
-        self._get_open_postions(transactions)
-        self._set_portfolio_weight()
-
-    def _get_open_postions(self, transactions):
-        """Answer to what positions the transactions sum up to."""
-        for t in transactions:
-            position = self.portfolio.get(t.instrument.con_id)
-            if position:
-                position = position.update(t)
-                if not position:  # position was sold
-                    del self.portfolio[t.instrument.con_id]
-                    continue
-            else:
-                position = Position(t.instrument, round(t.amount), t.transaction_price)
-
-            self.portfolio[t.instrument.con_id] = position
-
-    def print(self):
-        positions = sorted(self.portfolio.values(), key=self._get_sort_lambda(self.sort_order))
-        if self.sort_order.endswith("_r"):
-            positions = positions[::-1]
-        for p in positions:
-            columns = [
-                "{}".format(p.instrument.currency),
-                "{:18.18}".format(p.instrument.name),
-                "{:7.7}".format(p.instrument.symbol_yahoo),
-                "{:7,}".format(p.amount),
-                "{:7.3f}".format(p.price_average),
-                "{:7.3f}".format(p.price_now),
-                # "{:n}".format(p.get_delta_price(-7)),
-                # "{:n}".format(p.get_delta_price(-14)),
-                # "{:n}".format(p.get_delta_price(-30)),
-                # "{:n}".format(p.get_delta_price(-60)),
-                # "{:n}".format(p.get_delta_price(-90)),
-                # "{:7.1%}".format(p.price_change_percentage),
-                "{:5.1%}".format(p.weight),
-            ]
-            # here we need to wait for all promises to have reached
-            if self.machine_readable:
-                print(";".join([c.strip() for c in columns]))
-            else:
-                print("  ".join(columns))
-
-
-class Portfolio2(object):
-    portfolio = {}
 
     def __init__(
         self,
@@ -177,6 +113,8 @@ class Portfolio2(object):
     def print_positions(self):
         positions = self.get_positions()
         positions = sorted(positions, key=self._get_sort_lambda(self.sort_order))
+        if self.sort_order.endswith("_r"):
+            positions = positions[::-1]
         for p in positions:
             columns = [
                 "{}".format(p.currency),
@@ -189,7 +127,10 @@ class Portfolio2(object):
                 "{:+10,.0f}".format(p.delta_absolute),
                 "{:+.2%}".format(p.delta_percentage)
             ]
-            print("  ".join(columns))
+            if self.machine_readable:
+                print(";".join([c.strip() for c in columns]))
+            else:
+                print("  ".join(columns))
 
     def _get_sort_lambda(self, sort_order):
         if sort_order.endswith("_r"):
@@ -217,5 +158,5 @@ def main(instruments_filter, display_currency, filter_currency, machine_readable
     csv_path = config.get("csv_path")
     latest = get_latest_file(csv_path)
     reader = CSVReader(files=[latest], patterns=[CSVReader.position_pattern, CSVReader.portfolio_pattern])
-    p = Portfolio2(reader, instruments_filter, display_currency, machine_readable, sort_order)
+    p = Portfolio(reader, instruments_filter, display_currency, filter_currency, machine_readable, sort_order)
     p.print_positions()
