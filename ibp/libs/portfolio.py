@@ -1,4 +1,5 @@
 import csv
+from collections import namedtuple
 from datetime import datetime, timedelta
 
 from .config import config
@@ -8,6 +9,21 @@ from .money import Money
 from .parser import CSVReader
 from .transactions import TransactionParser
 
+PositionTuple = namedtuple(
+    "PositionTuple",
+    [
+        "currency",
+        "symbol_ib",
+        "amount",
+        "price_average",
+        "value_cost",  # How much money the entire position has cost
+        "price_now",
+        "value_now",
+        "delta_absolute",
+        "delta_percentage",
+        "portfolio_weight",
+    ],
+)
 
 class Position:
     def __init__(self, instrument, amount, price):
@@ -85,25 +101,6 @@ class Portfolio(object):
 
             self.portfolio[t.instrument.con_id] = position
 
-    def _set_portfolio_weight(self):
-        """
-        Set for each position how much % of the total value it presents. Only makes sense once all transactions are
-        parsed,
-        """
-        portfolio_value = sum((p.value for p in self.portfolio.values()))
-        for p in self.portfolio.values():
-            p.weight = (p.price_now * p.amount / portfolio_value).as_float
-
-    def _get_sort_lambda(self, sort_order):
-        if sort_order.endswith("_r"):
-            sort_order = sort_order[:-2]
-        methods = {
-            "name": lambda x: x.instrument.name,
-            "amount": lambda x: x.amount,
-            "symbol": lambda x: x.instrument.symbol_yahoo,
-        }
-        return methods.get(sort_order)
-
     def print(self):
         positions = sorted(self.portfolio.values(), key=self._get_sort_lambda(self.sort_order))
         if self.sort_order.endswith("_r"):
@@ -153,21 +150,57 @@ class Portfolio2(object):
         self.get_portfolio_metadata()
         self.total_stock_value, self.base_currency = self.get_portfolio_metadata()
 
-    def print_positions(self):
+    def get_positions(self):
         reader = csv.reader(self.position_lines, delimiter=",")
         positions = []
         for row in reader:
             row = row[4:]
-            currency, symbol_ib, _, amount, _, price_average, value_cost, price_now, value_now, value_delta, \
-                portfolio_weigth, _ = row
+            currency, symbol_ib, _, amount, _, price_average, value_cost, price_now, value_now, delta_absolute, \
+                portfolio_weight, _ = row
+            value_cost = Money(float(value_cost), currency)
+            value_now = Money(float(value_now), currency)
+            price_now = Money(float(price_now), currency)
+            price_average = Money(float(price_average), currency)
+            delta_absolute = Money(float(delta_absolute), currency)
+            if delta_absolute.as_float < 0:
+                delta_percentage = ((value_cost - value_now) / value_cost).as_float * -1
+            else:
+                delta_percentage = ((value_now - value_cost) / value_cost).as_float
+
             if self.filter_currency and self.filter_currency != currency:
                 continue
+            position = PositionTuple(currency, symbol_ib, int(amount), price_average, value_cost, price_now, value_now,
+                    delta_absolute, delta_percentage, portfolio_weight)
+            positions.append(position)
+        return positions
+
+    def print_positions(self):
+        positions = self.get_positions()
+        positions = sorted(positions, key=self._get_sort_lambda(self.sort_order))
+        for p in positions:
             columns = [
-                "{}".format(currency),
-                "{:7.7}".format(symbol_ib),
-                "{:6}".format(int(amount)),
+                "{}".format(p.currency),
+                "{:7.7}".format(p.symbol_ib),
+                "{:6}".format(p.amount),
+                "{:10.3f}".format(p.price_average),
+                "{:10.3f}".format(p.price_now),
+                "{:10,.0f}".format(p.value_cost),
+                "{:10,.0f}".format(p.value_now),
+                "{:+10,.0f}".format(p.delta_absolute),
+                "{:+.2%}".format(p.delta_percentage)
             ]
             print("  ".join(columns))
+
+    def _get_sort_lambda(self, sort_order):
+        if sort_order.endswith("_r"):
+            sort_order = sort_order[:-2]
+        methods = {
+            "name": lambda x: x.symbol_ib,
+            "amount": lambda x: x.amount,
+            # "symbol": lambda x: x.instrument.symbol_yahoo,
+        }
+        return methods.get(sort_order)
+
 
     def get_portfolio_metadata(self):
         """
