@@ -17,6 +17,7 @@ isort = "*"
 pudb = "*"
 pytest = "*"
 pytest-pudb = "*"
+pre-commit = "*"
 
 [requires]
 python_version = "3.9"
