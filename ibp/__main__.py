@@ -22,6 +22,10 @@ def main():
         raise RuntimeError("Unexpected mode '{}'. {}".format(sysargs[0], modes_msg))
 
     args = parser.parse_args(sysargs)
+    if hasattr(args, "instruments_filter"):
+        assert not any(
+            [i.startswith("-") for i in args.instruments_filter]
+        ), "Bad order of args, put instruments at end"
     if sysargs[0] == "transactions":
         transactions_main(
             args.instruments_filter,

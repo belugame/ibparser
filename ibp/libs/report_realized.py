@@ -43,9 +43,10 @@ class ReportRealized(object):
         df = df.cumsum()
         df = df.resample("M").pad()
         df["total return"] = df[["realized", "dividends"]].sum(1)
-        plot = df.plot(
+        ax = plot = df.plot(
             drawstyle="steps-post", color={"total return": "#7deb34", "realized": "red", "dividends": "orange"}
         )
+        ax.set_ylabel(self.display_currency)
         plot.set_xlim(dates[0] - timedelta(days=15), dates[-1] + timedelta(days=30))
         plt.savefig("saved_figure.png")
 
