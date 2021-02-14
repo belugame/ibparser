@@ -26,45 +26,6 @@ PositionTuple = namedtuple(
 )
 
 
-class Position:
-    def __init__(self, instrument, amount, price):
-        self.instrument = instrument
-        self.amount = round(amount)
-        self.price_average = price
-        self.price_now = self.instrument.get_price()
-        self.value = self.price_now * self.amount
-
-    def __repr__(self):
-        return "<{} {} @ {}>".format(self.amount, self.instrument.ib, self.price_average)
-
-    def update(self, transaction):
-        """Updates the position of a instrument with the content of another transaction."""
-        self.amount = round(self.amount + transaction.amount)
-        if self.amount == 0:  # position was sold
-            return None
-        self.price_average = self._calculate_average_price(transaction.amount, transaction.transaction_price)
-        return self
-
-    def _calculate_average_price(self, amount_new, price_new):
-        if self.amount + amount_new == 0:
-            return self.price_average
-        old = self.amount * self.price_average
-        new = amount_new * price_new
-        total_value = old + new
-        total_amount = self.amount + amount_new
-        return total_value / total_amount
-
-    def get_delta_price(self, delta_in_days_from_today):
-        """Get prices in the past: -1d, -7d etc. """
-        day = datetime.now() + timedelta(days=delta_in_days_from_today)
-        return self.instrument.get_price(day)
-
-    def get_delta_price_percentage(self, delta_in_days_from_today):
-        """Get prices in the past in percentage as delta to price today: -1d, -7d etc. """
-        day = datetime.now() + timedelta(days=delta_in_days_from_today)
-        return self.price_now / self.instrument.get_price(day)
-
-
 class Portfolio(object):
     def __init__(
         self,
