@@ -69,6 +69,4 @@ def main(instruments_filter, date_delta, display_currency, filter_currency):
         date_delta=date_delta,
         machine_readable=True,
     ).parse_dividend_lines()
-    ReportRealized(
-        transactions, dividends, display_currency=display_currency
-    ).print_report()
+    ReportRealized(transactions, dividends, display_currency=display_currency).print_report()

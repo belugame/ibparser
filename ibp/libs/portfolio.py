@@ -25,6 +25,7 @@ PositionTuple = namedtuple(
     ],
 )
 
+
 class Position:
     def __init__(self, instrument, amount, price):
         self.instrument = instrument
@@ -64,9 +65,7 @@ class Position:
         return self.price_now / self.instrument.get_price(day)
 
 
-
 class Portfolio(object):
-
     def __init__(
         self,
         reader,
@@ -91,8 +90,20 @@ class Portfolio(object):
         positions = []
         for row in reader:
             row = row[4:]
-            currency, symbol_ib, _, amount, _, price_average, value_cost, price_now, value_now, delta_absolute, \
-                portfolio_weight, _ = row
+            (
+                currency,
+                symbol_ib,
+                _,
+                amount,
+                _,
+                price_average,
+                value_cost,
+                price_now,
+                value_now,
+                delta_absolute,
+                portfolio_weight,
+                _,
+            ) = row
             value_cost = Money(float(value_cost), currency)
             value_now = Money(float(value_now), currency)
             price_now = Money(float(price_now), currency)
@@ -105,8 +116,18 @@ class Portfolio(object):
 
             if self.filter_currency and self.filter_currency != currency:
                 continue
-            position = PositionTuple(currency, symbol_ib, int(amount), price_average, value_cost, price_now, value_now,
-                    delta_absolute, delta_percentage, portfolio_weight)
+            position = PositionTuple(
+                currency,
+                symbol_ib,
+                int(amount),
+                price_average,
+                value_cost,
+                price_now,
+                value_now,
+                delta_absolute,
+                delta_percentage,
+                portfolio_weight,
+            )
             positions.append(position)
         return positions
 
@@ -125,7 +146,7 @@ class Portfolio(object):
                 "{:10,.0f}".format(p.value_cost),
                 "{:10,.0f}".format(p.value_now),
                 "{:+10,.0f}".format(p.delta_absolute),
-                "{:+.2%}".format(p.delta_percentage)
+                "{:+.2%}".format(p.delta_percentage),
             ]
             if self.machine_readable:
                 print(";".join([c.strip() for c in columns]))
@@ -144,7 +165,6 @@ class Portfolio(object):
         }
         assert sort_order in methods
         return methods.get(sort_order)
-
 
     def get_portfolio_metadata(self):
         """
