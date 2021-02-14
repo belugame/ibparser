@@ -47,6 +47,7 @@ def main():
             instruments_filter=args.instruments_filter,
             date_delta=args.date_delta,
             display_currency=args.display_currency,
+            filter_currency=args.filter_currency,
         )
 
 
