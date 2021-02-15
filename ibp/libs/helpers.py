@@ -52,6 +52,7 @@ def get_common_argument_parser(description):
     report_realized = subparsers.add_parser("report_realized")
     add_common_arguments(report_realized, machine_readable=False)
 
+    check = subparsers.add_parser("check")
     return parser
 
 

@@ -11,7 +11,14 @@ from .libs.transactions import main as transactions_main
 def main():
     parser = get_common_argument_parser("ibparser")
     sysargs = sys.argv[1:]
-    modes = {"t": "transactions", "d": "dividends", "e": "deposits", "p": "portfolio", "rr": "report_realized"}
+    modes = {
+        "t": "transactions",
+        "d": "dividends",
+        "e": "deposits",
+        "p": "portfolio",
+        "rr": "report_realized",
+        "c": "check",
+    }
     modes_msg = "Possible values: {}".format(", ".join(modes.values()))
     if len(sysargs) == 0:
         raise RuntimeError("Missing mode. {}.".format(modes_msg))
@@ -53,6 +60,10 @@ def main():
             display_currency=args.display_currency,
             filter_currency=args.filter_currency,
         )
+    elif sysargs[0] == "check":
+        from .libs.check_portfolio import main
+
+        main()
 
 
 if __name__ == "__main__":
