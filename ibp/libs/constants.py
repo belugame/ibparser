@@ -11,6 +11,7 @@ IB_EXCHANGE_TO_CURRENCY = {
     "FWB": "EUR",
     "FWB2": "EUR",
     "GETTEX": "EUR",
+    "GETTEX2": "EUR",
     "IBIS": "EUR",
     "IBIS2": "EUR",
     "LSEETF": "EUR",

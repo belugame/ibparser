@@ -39,7 +39,7 @@ class YahooSymbolPageScraper(object):
         return result
 
     def fetch_for_eur(self, symbol):
-        suffixes = [".F", ".AS", ".PA", ".BR", ".MI", ".LS", ".BE"]
+        suffixes = [".DE", ".F", ".AS", ".PA", ".BR", ".MI", ".LS", ".BE"]
         for s in suffixes:
             symbol = self.symbol_ib + s
             try:
