@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 from .config import config
+from .corporate_actions import CorporateActionParser
 from .dividends import DividendParser
 from .helpers import get_latest_file
 from .parser import CSVReader
@@ -17,6 +18,7 @@ def main():
     csv_path = config.get("csv_path")
     reader = CSVReader(csv_path)
     transactions = TransactionParser(reader).get_csv_transactions()
+    CorporateActionParser(reader).apply_actions(transactions)
     latest = get_latest_file(csv_path)
     reader = CSVReader(files=[latest], patterns=[CSVReader.position_pattern, CSVReader.portfolio_pattern])
     portfolio = Portfolio(reader)
