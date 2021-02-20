@@ -322,9 +322,10 @@ class TransactionParser(object):
         last_line[6] = " " * 12
         lines.append(last_line)
         if self.machine_readable:
-            print(";".join([c.strip() for c in columns]))
+            lines = [";".join([c.strip() for c in l]) for l in lines]
         else:
-            print("\n".join("  ".join(l) for l in lines))
+            lines = ["  ".join(l) for l in lines]
+        print("\n".join(lines))
 
 
 def main(instruments_filter, only_sell, only_buy, display_currency, filter_currency, date_delta, machine_readable):
