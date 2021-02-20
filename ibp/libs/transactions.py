@@ -257,14 +257,27 @@ class TransactionParser(object):
         amount_total = 0
         price_average = None
         invested_total = 0
+        column_formats = [
+            "{:10.10}",  # date
+            "{:3.3}",  # currency
+            "{:18.18}",  # name
+            "{:7.7}",  # ticker
+            "{:6.0f}",  # amount
+            "{:8.5f}",  # transaction price
+            "{:8.5f}",  # current price
+            "{:+7,.0f}",  # transaction amount
+            "{:7.1%}",  # unrealized percent
+            "{:9.2f}",  # realized profit/loss
+            "{:.2%}",  # realized percent
+        ]
         for t in [t for t in transactions]:
             amount_total += t.amount
             columns = [
-                "{}".format(t.timestamp.strftime("%Y-%m-%d")),
-                "{}".format(t.instrument.currency),
-                "{:18.18}".format(t.instrument.name),
-                "{:7.7}".format(t.instrument.symbol_yahoo),
-                "{:6.0f}".format(t.amount),
+                t.timestamp.strftime("%Y-%m-%d"),
+                t.instrument.currency,
+                t.instrument.name,
+                t.instrument.symbol_yahoo,
+                t.amount,
             ]
             assert t.price_today.as_float != 0.0, "{}: {}".format(t, t.price_today)
             assert t.price.as_float != 0.0, "{}: {}".format(t, t.price)
@@ -277,13 +290,7 @@ class TransactionParser(object):
 
             total_transaction = -1 * t.amount * price
             invested_total += total_transaction
-            columns += [
-                "{:8.5f}".format(price),
-                "{:8.5f}".format(price_today),
-                "{:+7,.0f}".format(total_transaction),
-            ]
-
-            columns.append("{:7.1%}".format(t.unrealized_percent))
+            columns += [price, price_today, total_transaction, t.unrealized_percent]
 
             if t.amount < 0:
                 if self.display_currency:
@@ -292,26 +299,28 @@ class TransactionParser(object):
                 else:
                     amount_realized = t.realized
                     realized_total += t.realized
-                columns.append("{:9.2f}".format(amount_realized))
+                columns.append(amount_realized)
                 if t.realized_percent:
-                    columns.append("{:.2%}".format(t.realized_percent))
+                    columns.append(t.realized_percent)
             else:
                 price_average = calculate_average_price(amount_total, t.amount, price_average, t.price)
-            lines.append(columns)
-        last_line = [
-            " " * 10,
-            " " * 3,
-            " " * 18,
-            " " * 7,
-            "{:6.0f}".format(amount_total),
-            "{:8.5f}".format(price_average),
-            "{:8.8}".format(" "),
-            "{:+7,.0f}".format(invested_total),
-            "{:7.1%}".format((price_today / price_average).as_float - 1),
-            "{:9.2f}".format(realized_total),
-        ]
-        lines.append(last_line)
+            lines.append([column_formats[num].format(col) for num, col in enumerate(columns)])
 
+        last_line = [
+            "",
+            "",
+            "",
+            "",
+            amount_total,
+            price_average,
+            price_today,
+            invested_total,
+            (price_today / price_average).as_float - 1,
+            realized_total,
+        ]
+        last_line = [column_formats[num].format(col) for num, col in enumerate(last_line)]
+        last_line[6] = " " * 12
+        lines.append(last_line)
         if self.machine_readable:
             print(";".join([c.strip() for c in columns]))
         else:
