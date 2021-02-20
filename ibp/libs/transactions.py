@@ -252,8 +252,13 @@ class TransactionParser(object):
     def print_transactions(self):
         transactions = self.get_csv_transactions()
         CorporateActionParser(self.reader).apply_actions(transactions)
-        total_realized = 0
+        lines = []
+        realized_total = 0
+        amount_total = 0
+        price_average = None
+        invested_total = 0
         for t in [t for t in transactions]:
+            amount_total += t.amount
             columns = [
                 "{}".format(t.timestamp.strftime("%Y-%m-%d")),
                 "{}".format(t.instrument.currency),
@@ -269,10 +274,13 @@ class TransactionParser(object):
             else:
                 price = t.price
                 price_today = t.price_today
+
+            total_transaction = -1 * t.amount * price
+            invested_total += total_transaction
             columns += [
-                "{:7.3f}".format(price),
-                "{:7.2f}".format(price_today),
-                "{:+7,.0f}".format(-1 * t.amount * price),
+                "{:8.5f}".format(price),
+                "{:8.5f}".format(price_today),
+                "{:+7,.0f}".format(total_transaction),
             ]
 
             columns.append("{:7.1%}".format(t.unrealized_percent))
@@ -280,18 +288,34 @@ class TransactionParser(object):
             if t.amount < 0:
                 if self.display_currency:
                     amount_realized = t.realized.convert_to(self.display_currency)
-                    total_realized += amount_realized
+                    realized_total += amount_realized
                 else:
                     amount_realized = t.realized
-                    total_realized += t.realized
+                    realized_total += t.realized
                 columns.append("{:9.2f}".format(amount_realized))
                 if t.realized_percent:
                     columns.append("{:.2%}".format(t.realized_percent))
-            if self.machine_readable:
-                print(";".join([c.strip() for c in columns]))
             else:
-                print("  ".join(columns))
-        print("Total: {:,.2f}".format(total_realized))
+                price_average = calculate_average_price(amount_total, t.amount, price_average, t.price)
+            lines.append(columns)
+        last_line = [
+            " " * 10,
+            " " * 3,
+            " " * 18,
+            " " * 7,
+            "{:6.0f}".format(amount_total),
+            "{:8.5f}".format(price_average),
+            "{:8.8}".format(" "),
+            "{:+7,.0f}".format(invested_total),
+            "{:7.1%}".format((price_today / price_average).as_float - 1),
+            "{:9.2f}".format(realized_total),
+        ]
+        lines.append(last_line)
+
+        if self.machine_readable:
+            print(";".join([c.strip() for c in columns]))
+        else:
+            print("\n".join("  ".join(l) for l in lines))
 
 
 def main(instruments_filter, only_sell, only_buy, display_currency, filter_currency, date_delta, machine_readable):
@@ -300,3 +324,11 @@ def main(instruments_filter, only_sell, only_buy, display_currency, filter_curre
         reader, instruments_filter, only_sell, only_buy, display_currency, filter_currency, date_delta, machine_readable
     )
     p.print_transactions()
+
+
+def calculate_average_price(amount_total, amount_new, price_current, price_new):
+    if not price_current:
+        return price_new
+    amount_previous = amount_total - amount_new
+    average = (amount_previous * price_current + amount_new * price_new) / (amount_previous + amount_new)
+    return average
