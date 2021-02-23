@@ -253,21 +253,23 @@ class TransactionPrinter(object):
         "{:18.18}",  # name
         "{:7.7}",  # ticker
         "{:6.0f}",  # amount
-        "{:8.5f}",  # transaction price
-        "{:8.5f}",  # current price
+        "{:12.4f}",  # transaction price
+        "{:12.4f}",  # current price
         "{:+7,.0f}",  # transaction amount
         "{:7.1%}",  # unrealized percent
         "{:9.2f}",  # realized profit/loss
         "{:.2%}",  # realized percent
     ]
 
-    def __init__(self, transactions, display_currency, machine_readable):
+    def __init__(self, transactions, display_currency, machine_readable, show_price_average, show_amount_total):
         self.transactions = transactions
         self.display_currency = display_currency
         self.machine_readable = machine_readable
+        self.show_price_average = show_price_average
+        self.show_amount_total = show_amount_total
         self.realized_total = 0
         self.amount_total = 0
-        self.price_average = None
+        self.price_average = ""
         self.invested_total = 0
 
     def print(self):
@@ -276,26 +278,36 @@ class TransactionPrinter(object):
             lines.append(self.transaction_to_line(t))
         if not lines:
             return
-        last_line = [
-            "",
-            "",
-            "",
-            "",
-            self.amount_total,
-            self.price_average,
-            self.price_today,
-            self.invested_total,
-            (self.price_today / self.price_average).as_float - 1,
-            self.realized_total,
-        ]
-        last_line = [self.column_formats[num].format(col) for num, col in enumerate(last_line)]
-        last_line[6] = " " * 12
-        lines.append(last_line)
+        lines.append(self.get_status_line())
         if self.machine_readable:
             lines = [";".join([c.strip() for c in l]) for l in lines]
         else:
             lines = ["  ".join(l) for l in lines]
         print("\n".join(lines))
+
+    def get_status_line(self):
+        column_formats = self.column_formats.copy()
+        column_formats[6] = "{:16.16}"
+        if not self.show_amount_total:
+            column_formats[4] = "{:6.6}"
+        if not self.show_price_average:
+            column_formats[5] = "{:16.16}"
+            column_formats[8] = "{:11.11}"
+        status_line = [
+            "",
+            "",
+            "",
+            "",
+            self.amount_total if self.show_amount_total else "",
+            self.price_average if self.show_price_average else "",
+            "",
+            self.invested_total,
+            (self.price_today / self.price_average).as_float - 1 if self.show_price_average else "",
+            self.realized_total,
+        ]
+
+        status_line = [column_formats[num].format(col) for num, col in enumerate(status_line)]
+        return status_line
 
     def transaction_to_line(self, t):
         self.amount_total += t.amount
@@ -329,7 +341,7 @@ class TransactionPrinter(object):
             columns.append(amount_realized)
             if t.realized_percent:
                 columns.append(t.realized_percent)
-        else:
+        elif self.show_price_average:
             self.price_average = calculate_average_price(self.amount_total, t.amount, self.price_average, t.price)
 
         return [self.column_formats[num].format(col) for num, col in enumerate(columns)]
@@ -340,7 +352,10 @@ def main(instruments_filter, only_sell, only_buy, display_currency, filter_curre
     t = TransactionParser(reader, instruments_filter, only_sell, only_buy, filter_currency, date_delta)
     transactions = t.get_csv_transactions()
     CorporateActionParser(reader).apply_actions(transactions)
-    TransactionPrinter(transactions, display_currency, machine_readable).print()
+    show_price_average = show_amount_total = True
+    if (instruments_filter and len(instruments_filter) > 1) or not instruments_filter:
+        show_price_average = show_amount_total = False
+    TransactionPrinter(transactions, display_currency, machine_readable, show_price_average, show_amount_total).print()
 
 
 def calculate_average_price(amount_total, amount_new, price_current, price_new):
