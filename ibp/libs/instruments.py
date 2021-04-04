@@ -151,7 +151,7 @@ class InstrumentParser(object):
         _, _, _, symbol_ib, name, con_id, security_id, exchange = row[:8]
         currency = None
         if exchange:
-            if exchange in ("CORPACT", "RIGHT"):
+            if exchange in ("CORPACT", "RIGHT", "1"):
                 return None
             assert exchange in IB_EXCHANGE_TO_CURRENCY, "Missing exchange: '{}'  Row: {}".format(exchange, row)
             currency = IB_EXCHANGE_TO_CURRENCY.get(exchange)
