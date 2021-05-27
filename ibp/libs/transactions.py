@@ -269,7 +269,7 @@ class TransactionPrinter(object):
         self.show_amount_total = show_amount_total
         self.realized_total = 0
         self.amount_total = 0
-        self.price_average = ""
+        self.price_average = 0
         self.invested_total = 0
 
     def print(self):
@@ -341,7 +341,7 @@ class TransactionPrinter(object):
             columns.append(amount_realized)
             if t.realized_percent:
                 columns.append(t.realized_percent)
-        elif self.show_price_average:
+        if self.show_price_average:
             self.price_average = calculate_average_price(self.amount_total, t.amount, self.price_average, t.price)
 
         return [self.column_formats[num].format(col) for num, col in enumerate(columns)]
@@ -361,6 +361,8 @@ def main(instruments_filter, only_sell, only_buy, display_currency, filter_curre
 def calculate_average_price(amount_total, amount_new, price_current, price_new):
     if not price_current:
         return price_new
+    if amount_total == 0 or amount_new < 0:
+        return price_current
     amount_previous = amount_total - amount_new
-    average = (amount_previous * price_current + amount_new * price_new) / (amount_previous + amount_new)
+    average = (amount_previous * price_current + amount_new * price_new) / amount_total
     return average
