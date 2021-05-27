@@ -13,6 +13,10 @@ class BaseModel(Model):
         database = db
 
 
+class InstrumentIgnored(BaseModel):
+    symbol_ib = CharField()
+
+
 class Instrument(BaseModel):
     name = CharField()
     symbol_ib = CharField()
@@ -39,4 +43,4 @@ class CurrencyRate(BaseModel):
     date = DateField(null=False)
 
 
-db.create_tables([Instrument, Price, CurrencyRate])
+db.create_tables([InstrumentIgnored, Instrument, Price, CurrencyRate])

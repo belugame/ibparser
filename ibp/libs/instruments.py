@@ -3,7 +3,7 @@ import csv
 from .config import config
 from .constants import IB_EXCHANGE_TO_CURRENCY
 from .logging import log
-from .models import Instrument as DBInstrument
+from .models import Instrument as DBInstrument, InstrumentIgnored as DBInstrumentIgnored
 from .money import Money
 from .prices import PriceService, thread_price_service
 from .yahoo_instrument_scraper import YahooSymbolPageScraper
@@ -210,6 +210,10 @@ class InstrumentDatabase(object):
         """
         db_instrument = DBInstrument.get_or_none(con_id=instrument.con_id)
         if not db_instrument:
+            if not instrument.symbol_yahoo:
+                log.debug("Add to ignore list: {}".format(instrument.symbol_ib))
+                DBInstrumentIgnored(symbol_ib=instrument.symbol_ib).save()
+                return
             log.debug("Add instrument to database: {}".format(instrument.symbol_ib))
             DBInstrument(
                 name=instrument.name,
@@ -235,6 +239,8 @@ class InstrumentDatabase(object):
 
 def ignore_instrument(con_id, symbols, instrument_filter, currency=None):
     assert con_id or symbols, "One of either must be given for db lookup"
+    if DBInstrumentIgnored.get_or_none(symbol_ib=symbols[0]):
+        return True
     ignored_symbols = config.get("ignored_symbols").split(",")
     if any([extract_symbol(s) in ignored_symbols for s in symbols]):
         return True
