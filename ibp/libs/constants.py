@@ -18,6 +18,7 @@ IB_EXCHANGE_TO_CURRENCY = {
     "NASDAQ": "USD",
     "NYSE": "USD",
     "PINK": "USD",
+    "PURE": "CAD",
     "SBF": "EUR",
     "SEHK": "HKD",
     "SGX": "SGD",
