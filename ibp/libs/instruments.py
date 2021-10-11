@@ -67,6 +67,8 @@ class Instrument(object):
                 ).fetch()
                 if not self.currency:
                     self.currency = yahoo_currency
+                elif not yahoo_currency:
+                    pass
                 else:
                     assert self.currency == yahoo_currency
             db.add(self)

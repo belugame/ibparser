@@ -105,6 +105,11 @@ class YahooSymbolPageScraper(object):
                 log.warning("{:12}: Received 503 request, trying again in few seconds...".format(symbol))
                 sleep(4)
                 return self.get_yahoo_response(symbol, failed_attemps + 1)
+            if e.code == 404:
+                print(url)
+                raise BadYahooSymbolError()
+            else:
+                raise
 
         if my_request.url != url:
             log.debug("{:12}: Not found".format(symbol))
@@ -116,7 +121,11 @@ class YahooSymbolPageScraper(object):
 
     def parse_yahoo_response(self, my_request):
         """Retrieve symbol ticker, full name and currency from the response from finance.yahoo.com"""
-        response = my_request.read().decode("utf-8")
+        try:
+            response = my_request.read().decode("utf-8")
+        except UnicodeDecodeError:
+            return None, "", ""
+        log.error(response)
         name, symbol = self._get_name_and_symbol_from_response(response)
         if not name:
             return None, "", ""

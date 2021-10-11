@@ -28,7 +28,11 @@ class CorporateActionParser(object):
             old_symbol_ib = row[6].split("(")[0]
             security_id_old = row[6].split("(")[1].split(")")[0]
             security_id_new = row[6].split(",").pop().strip(" )")
-            ratio = re.search(r"(\d+) for (\d+)", row[6], re.IGNORECASE).group()  # e.g 100 FOR 1
+            try:
+                ratio = re.search(r"(\d+) for (\d+)", row[6], re.IGNORECASE).group()  # e.g 100 FOR 1
+            except AttributeError:
+                log.error("Unable to parse corporate action: {}".format(row[6]))
+                return
             num_old, _, num_new = ratio.split()
             ratio = float(num_old) / float(num_new)
             action = CorporateAction(date_action, old_symbol_ib, ratio, currency, security_id_old, security_id_new)
