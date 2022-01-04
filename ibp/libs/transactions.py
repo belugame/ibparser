@@ -84,6 +84,25 @@ TransactionRowFormat4 = namedtuple(
     ],
 )
 
+TransactionRowFormat5 = namedtuple(
+    "TransactionFormat4",
+    [
+        "currency",
+        "account",
+        "symbol_ib",
+        "timestamp",
+        "amount",
+        "transaction_price",
+        "c_price",
+        "transaction_total",
+        "fee",
+        "basis",
+        "realized",
+        "mtm",
+        "code",
+    ],
+)
+
 
 class Transaction(object):
     """
@@ -194,6 +213,8 @@ class TransactionParser(object):
         if len(row) == 13:
             if re.match(r"^-?[\d,]+$", row[3]):
                 transaction = TransactionRowFormat1(*row)
+            elif re.match(r"^U\d+$", row[1]):
+                transaction = TransactionRowFormat5(*row)
             else:
                 transaction = TransactionRowFormat4(*row)
         elif len(row) == 14:

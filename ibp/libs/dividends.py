@@ -1,4 +1,5 @@
 import csv
+import re
 from collections import namedtuple
 from datetime import datetime
 
@@ -50,8 +51,11 @@ class DividendParser(object):
         reader = csv.reader(lines, delimiter=",")
         dividends = {}
         for row in reader:
-            row = row[:6]
-            _, _, currency, date_activity, description, amount = row
+            if re.match(r"^U\d+$", row[3]):
+                _, _, currency, _, date_activity, description, amount = row
+            else:
+                _, _, currency, date_activity, description, amount = row
+
             date_activity = datetime.strptime(date_activity, "%Y-%m-%d")
             if self.filter_currency and self.filter_currency != currency:
                 continue
@@ -68,8 +72,9 @@ class DividendParser(object):
             db_instrument = db.get_by_symbol_ib(symbol_ib)
             if not db_instrument:
                 db_instrument = db.get_by_security_id(security_id)
+
             amount = Money(float(amount), currency)
-            key = "{}-{}-{}-{}".format(date_activity, symbol_ib, security_id, amount)
+            key = "{}-{}-{}-{}".format(date_activity, symbol_ib, security_id, amount.as_float)
             if key in dividends:
                 d = dividends[key]
                 if d.description == description and "LU0378438732" not in description:
