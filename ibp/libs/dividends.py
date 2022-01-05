@@ -53,8 +53,12 @@ class DividendParser(object):
         for row in reader:
             if re.match(r"^U\d+$", row[3]):
                 _, _, currency, _, date_activity, description, amount = row
-            else:
+            elif len(row) == 6:
                 _, _, currency, date_activity, description, amount = row
+            elif len(row) == 7:
+                _, _, currency, date_activity, description, amount, _ = row
+            else:
+                raise Exception("Unknown row format")
 
             date_activity = datetime.strptime(date_activity, "%Y-%m-%d")
             if self.filter_currency and self.filter_currency != currency:
