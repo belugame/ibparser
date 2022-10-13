@@ -1,2 +1,4 @@
+build
 venv*
 ibparser.db
+ibparser.egg-info

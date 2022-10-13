@@ -18,7 +18,7 @@ setuptools.setup(
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Operating System :: Unix",
     ],
-    python_requires=">=3.8",
+    python_requires=">=3.10",
     install_requires=[
         "forex-python",
         "matplotlib",
