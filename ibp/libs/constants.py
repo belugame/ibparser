@@ -1,5 +1,6 @@
 IB_EXCHANGE_TO_CURRENCY = {
     "AEB": "EUR",
+    "AMEX": "USD",
     "ARCA": "USD",
     "ASX": "AUD",
     "BATS": "USD",
