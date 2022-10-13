@@ -53,14 +53,16 @@ class PriceService(object):
             )
             return 0.001
         log.debug("{}: Fetching {}".format(self.instrument.symbol_yahoo, date_time))
+        start = round(date_time.timestamp())
+        end = round((date_time + timedelta(days=1)).timestamp())
         try:
-            data = Fetcher(self.instrument.symbol_yahoo, [date_time.year, date_time.month, date_time.day])
+            data = Fetcher(self.instrument.symbol_yahoo, start, end)
         except UnboundLocalError:
             log.warning("Failed to fetch price: {} {}".format(self.instrument.symbol_yahoo, date_time))
             return self.get(date_time - timedelta(days=1), failed_tries=failed_tries + 1).as_float
 
         try:
-            price_as_float = data.getDatePrice().values[0][1]
+            price_as_float = data.get_historical().values[0][1]
         except IndexError:
             log.warning("Failed to fetch price: {} {}".format(self.instrument.symbol_yahoo, date_time))
             price_as_float = self.get(date_time - timedelta(days=1), failed_tries=failed_tries + 1).as_float
