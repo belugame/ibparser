@@ -57,10 +57,8 @@ def main(instruments_filter, date_delta, display_currency, filter_currency):
         reader,
         instruments_filter,
         only_sell=True,
-        display_currency=display_currency,
         filter_currency=filter_currency,
         date_delta=date_delta,
-        machine_readable=True,
     ).get_csv_transactions()
     dividends = DividendParser(
         reader,
